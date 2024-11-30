@@ -2,3 +2,5 @@
 zig-out/
 # Remove all inputs file
 *.txt
+# No leak of the cookie
+.env
