@@ -1,2 +1,4 @@
 .zig-cache/
 zig-out/
+# Remove all inputs file
+*.txt
