@@ -2,7 +2,7 @@ const std = @import("std");
 const mem = std.mem;
 const print = std.debug.print;
 const testing = std.testing;
-const utils = @import("../src/utils.zig");
+const utils = @import("utils.zig");
 
 pub fn main() void {
     const data = utils.readFile("day01/input.txt") catch |err| {

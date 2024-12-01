@@ -5,7 +5,7 @@ const math = std.math;
 const mem = std.mem;
 const print = std.debug.print;
 const testing = std.testing;
-const utils = @import("../src/utils.zig");
+const utils = @import("utils.zig");
 
 const Complex = math.complex.Complex;
 
