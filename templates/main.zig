@@ -1,8 +1,13 @@
 const std = @import("std");
+const Allocator = std.mem.Allocator;
+const ascii = std.ascii;
+const math = std.math;
+const mem = std.mem;
 const print = std.debug.print;
 const testing = std.testing;
-const Complex = std.math.complex.Complex;
 const utils = @import("../src/utils.zig");
+
+const Complex = math.complex.Complex;
 
 pub fn main() void {
     const data = utils.readFile("input.txt") catch |err| {
