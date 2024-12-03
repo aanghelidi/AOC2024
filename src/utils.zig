@@ -97,6 +97,23 @@ pub fn positiveInts(comptime T: type, text: []const u8, allocator: std.mem.Alloc
     return nums;
 }
 
+pub fn digits(comptime T: type, text: []const u8, allocator: std.mem.Allocator) !std.ArrayList(T) {
+    if (@typeInfo(T) != .int or @typeInfo(T).int.signedness != .unsigned) {
+        @compileError("`T` must be a unsigned integer");
+    }
+
+    var nums = std.ArrayList(T).init(allocator);
+
+    var i: usize = 0;
+    while (i < text.len) : (i += 1) {
+        if (!ascii.isDigit(text[i])) continue;
+        const num = text[i] - '0';
+        try nums.append(num);
+    }
+
+    return nums;
+}
+
 test "Position can init" {
     const pos = Position(u8).init(0, 0);
     try testing.expectEqual(0, pos.x);
@@ -178,5 +195,40 @@ test "parsing positive ints" {
     // Should raise a compile time error
     // comptime {
     //     _ = positiveInts(i32, "123", std.testing.allocator);
+    // }
+}
+
+test "parsing digits" {
+    var result = try digits(u8, "Here are some numbers: -42, 123, -567, 890, and -12.", testing.allocator);
+    defer result.deinit();
+    try std.testing.expectEqualSlices(u8, &[_]u8{ 4, 2, 1, 2, 3, 5, 6, 7, 8, 9, 0, 1, 2 }, result.items);
+
+    var result_2 = try digits(u8, "1 2 3 4 5", testing.allocator);
+    defer result_2.deinit();
+    try std.testing.expectEqualSlices(u8, &[_]u8{ 1, 2, 3, 4, 5 }, result_2.items);
+
+    var result_3 = try digits(u8, "-1 -2 -3 -4 -5", testing.allocator);
+    defer result_3.deinit();
+    try std.testing.expectEqualSlices(u8, &[_]u8{ 1, 2, 3, 4, 5 }, result_3.items);
+
+    var result_4 = try digits(u8, "No numbers here!", testing.allocator);
+    defer result_4.deinit();
+    try std.testing.expectEqualSlices(u8, &[_]u8{}, result_4.items);
+
+    var result_5 = try digits(u32, "1234567890", testing.allocator);
+    defer result_5.deinit();
+    try std.testing.expectEqualSlices(u32, &[_]u32{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 }, result_5.items);
+
+    var result_6 = try digits(u16, "  123  456  789  ", testing.allocator);
+    defer result_6.deinit();
+    try std.testing.expectEqualSlices(u16, &[_]u16{ 1, 2, 3, 4, 5, 6, 7, 8, 9 }, result_6.items);
+
+    var result_7 = try digits(u16, "123abc-456def789", testing.allocator);
+    defer result_7.deinit();
+    try std.testing.expectEqualSlices(u16, &[_]u16{ 1, 2, 3, 4, 5, 6, 7, 8, 9 }, result_7.items);
+
+    // Should raise a compile time error
+    // comptime {
+    //     _ = digits(i32, "123", std.testing.allocator);
     // }
 }
