@@ -72,6 +72,31 @@ pub fn ints(comptime T: type, text: []const u8, allocator: std.mem.Allocator) !s
     return nums;
 }
 
+/// Parses a string and extracts all integers.
+///
+/// This function scans the input string for sequences of digits and converts them into integers of type `T`.
+/// Only positive integers are collected into an `ArrayList(T)`. The function returns a compile time error
+/// when `T` is not an unsigned integer.
+pub fn positiveInts(comptime T: type, text: []const u8, allocator: std.mem.Allocator) !std.ArrayList(T) {
+    if (@typeInfo(T) != .int or @typeInfo(T).int.signedness != .unsigned) {
+        @compileError("`T` must be a unsigned integer");
+    }
+
+    var nums = std.ArrayList(T).init(allocator);
+
+    var i: usize = 0;
+    while (i < text.len) : (i += 1) {
+        if (!ascii.isDigit(text[i])) continue;
+        const start = i;
+        while (i < text.len and ascii.isDigit(text[i])) : (i += 1) {}
+        const num_str = text[start..i];
+        const num = try std.fmt.parseInt(T, num_str, 10);
+        try nums.append(num);
+    }
+
+    return nums;
+}
+
 test "Position can init" {
     const pos = Position(u8).init(0, 0);
     try testing.expectEqual(0, pos.x);
@@ -118,5 +143,40 @@ test "parsing ints" {
     // Should raise a compile time error
     // comptime {
     //     _ = ints(u32, "123", std.testing.allocator);
+    // }
+}
+
+test "parsing positive ints" {
+    var result = try positiveInts(u16, "Here are some numbers: -42, 123, -567, 890, and -12.", testing.allocator);
+    defer result.deinit();
+    try std.testing.expectEqualSlices(u16, &[_]u16{ 42, 123, 567, 890, 12 }, result.items);
+
+    var result_2 = try positiveInts(u8, "1 2 3 4 5", testing.allocator);
+    defer result_2.deinit();
+    try std.testing.expectEqualSlices(u8, &[_]u8{ 1, 2, 3, 4, 5 }, result_2.items);
+
+    var result_3 = try positiveInts(u8, "-1 -2 -3 -4 -5", testing.allocator);
+    defer result_3.deinit();
+    try std.testing.expectEqualSlices(u8, &[_]u8{ 1, 2, 3, 4, 5 }, result_3.items);
+
+    var result_4 = try positiveInts(u8, "No numbers here!", testing.allocator);
+    defer result_4.deinit();
+    try std.testing.expectEqualSlices(u8, &[_]u8{}, result_4.items);
+
+    var result_5 = try positiveInts(u32, "1234567890", testing.allocator);
+    defer result_5.deinit();
+    try std.testing.expectEqualSlices(u32, &[_]u32{1234567890}, result_5.items);
+
+    var result_6 = try positiveInts(u16, "  123  456  789  ", testing.allocator);
+    defer result_6.deinit();
+    try std.testing.expectEqualSlices(u16, &[_]u16{ 123, 456, 789 }, result_6.items);
+
+    var result_7 = try positiveInts(u16, "123abc-456def789", testing.allocator);
+    defer result_7.deinit();
+    try std.testing.expectEqualSlices(u16, &[_]u16{ 123, 456, 789 }, result_7.items);
+
+    // Should raise a compile time error
+    // comptime {
+    //     _ = positiveInts(i32, "123", std.testing.allocator);
     // }
 }
