@@ -97,6 +97,10 @@ pub fn positiveInts(comptime T: type, text: []const u8, allocator: std.mem.Alloc
     return nums;
 }
 
+/// Parses a string and extracts all digits.
+///
+/// This function scans the input string for digits and converts them into integers of type `T`.
+/// The function returns a compile time error when `T` is not an unsigned integer.
 pub fn digits(comptime T: type, text: []const u8, allocator: std.mem.Allocator) !std.ArrayList(T) {
     if (@typeInfo(T) != .int or @typeInfo(T).int.signedness != .unsigned) {
         @compileError("`T` must be a unsigned integer");
