@@ -120,8 +120,8 @@ pub fn digits(comptime T: type, text: []const u8, allocator: std.mem.Allocator) 
 
 test "Position can init" {
     const pos = Position(u8).init(0, 0);
-    try testing.expectEqual(0, pos.x);
-    try testing.expectEqual(0, pos.y);
+    try testing.expectEqual(0, pos.row);
+    try testing.expectEqual(0, pos.col);
 }
 
 test "allDigits scenarios" {
