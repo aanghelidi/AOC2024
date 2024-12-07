@@ -18,13 +18,13 @@ pub fn readFile(filename: []const u8) ![]u8 {
 pub fn Position(comptime T: type) type {
     return struct {
         const Self = @This();
-        x: T,
-        y: T,
+        row: T,
+        col: T,
 
-        pub fn init(x: T, y: T) Self {
+        pub fn init(row: T, col: T) Self {
             return Self{
-                .x = x,
-                .y = y,
+                .row = row,
+                .col = col,
             };
         }
     };
