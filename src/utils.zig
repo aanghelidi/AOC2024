@@ -27,6 +27,22 @@ pub fn Position(comptime T: type) type {
                 .col = col,
             };
         }
+
+        pub fn N4(self: Self, allocator: std.mem.Allocator) !std.ArrayList(Self) {
+            var list = std.ArrayList(Self).init(allocator);
+            errdefer list.deinit();
+
+            try list.append(Self.init(self.row + 1, self.col));
+            try list.append(Self.init(self.row - 1, self.col));
+            try list.append(Self.init(self.row, self.col + 1));
+            try list.append(Self.init(self.row, self.col - 1));
+
+            return list;
+        }
+
+        pub fn isEqual(self: Self, other: Self) bool {
+            return self.row == other.row and self.col == other.col;
+        }
     };
 }
 
@@ -122,6 +138,22 @@ test "Position can init" {
     const pos = Position(u8).init(0, 0);
     try testing.expectEqual(0, pos.row);
     try testing.expectEqual(0, pos.col);
+}
+
+test "Position get n4" {
+    var pos = Position(isize).init(2, 3);
+    const allocator = std.testing.allocator;
+    const actual = try pos.N4(allocator);
+    defer actual.deinit();
+    const pos1 = Position(isize).init(3, 3);
+    const pos2 = Position(isize).init(1, 3);
+    const pos3 = Position(isize).init(2, 4);
+    const pos4 = Position(isize).init(2, 2);
+
+    try testing.expect(pos1.isEqual(actual.items[0]));
+    try testing.expect(pos2.isEqual(actual.items[1]));
+    try testing.expect(pos3.isEqual(actual.items[2]));
+    try testing.expect(pos4.isEqual(actual.items[3]));
 }
 
 test "allDigits scenarios" {
