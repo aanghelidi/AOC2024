@@ -14,6 +14,22 @@ pub fn readFile(filename: []const u8) ![]u8 {
     return data;
 }
 
+/// Basic pair
+pub fn Pair(comptime T: type) type {
+    return struct {
+        const Self = @This();
+        row: T,
+        col: T,
+
+        pub fn init(row: T, col: T) Self {
+            return Self{
+                .row = row,
+                .col = col,
+            };
+        }
+    };
+}
+
 /// Simple generic struct containing Position info.
 pub fn Position(comptime T: type) type {
     return struct {
