@@ -32,14 +32,21 @@ pub fn main() !void {
         try position_byte.put(N, line);
         N += 1;
     }
-
-    var byte_position: usize = 0;
-    while (true) : (byte_position += 1) {
-        grid = try parse(H, W, data, byte_position);
+    var low: usize = 0;
+    var high: usize = N;
+    var byte_position: usize = math.minInt(usize);
+    while (low < high) {
+        const mid = (low + high) / 2;
+        grid = try parse(H, W, data, mid);
         costs = try solve(H, W, &grid, allocator);
-        if (!costs.contains(position_end)) break;
+        if (!costs.contains(position_end)) {
+            high = mid - 1;
+        } else {
+            low = mid + 1;
+            byte_position = @max(byte_position, mid);
+        }
     }
-    print("Part 2: {s}\n", .{position_byte.get(byte_position - 1).?});
+    print("Part 2: {s}\n", .{position_byte.get(byte_position).?});
 }
 
 fn solve(comptime H: usize, comptime W: usize, grid: *[H][W]u8, allocator: Allocator) !std.AutoHashMap(Position(isize), u32) {
